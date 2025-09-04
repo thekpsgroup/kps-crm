@@ -1,0 +1,114 @@
+# Sample RingCentral webhook payload for testing
+# Use this with tools like REST Client or curl to test the webhook endpoint
+# POST to http://localhost:3000/api/ringcentral/webhook
+# Add X-RingCentral-Signature header with HMAC signature if webhook secret is configured
+
+POST http://localhost:3000/api/ringcentral/webhook
+Content-Type: application/json
+X-RingCentral-Signature: your-signature-here
+
+{
+  "event": "/restapi/v1.0/account/~/extension/~/call-log",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "subscriptionId": "example-subscription-id",
+  "ownerId": "123456789",
+  "body": {
+    "uri": "https://platform.ringcentral.com/restapi/v1.0/account/~/extension/~/call-log",
+    "records": [
+      {
+        "id": "call-12345",
+        "sessionId": "session-67890",
+        "startTime": "2024-01-15T10:25:00.000Z",
+        "duration": 125,
+        "type": "Voice",
+        "direction": "Outbound",
+        "action": "VoIP Call",
+        "result": "Call connected",
+        "to": {
+          "phoneNumber": "+1555123456",
+          "name": "John Doe"
+        },
+        "from": {
+          "phoneNumber": "+1555987654",
+          "name": "CRM System"
+        },
+        "recording": {
+          "uri": "https://platform.ringcentral.com/restapi/v1.0/account/~/recording/recording-123",
+          "id": "recording-123",
+          "type": "OnDemand",
+          "contentUri": "https://media.ringcentral.com/restapi/v1.0/account/~/recording/recording-123/content"
+        }
+      }
+    ]
+  }
+}
+
+###
+# Another example - Inbound call
+POST http://localhost:3000/api/ringcentral/webhook
+Content-Type: application/json
+
+{
+  "event": "/restapi/v1.0/account/~/extension/~/call-log",
+  "timestamp": "2024-01-15T11:00:00.000Z",
+  "subscriptionId": "example-subscription-id",
+  "ownerId": "123456789",
+  "body": {
+    "uri": "https://platform.ringcentral.com/restapi/v1.0/account/~/extension/~/call-log",
+    "records": [
+      {
+        "id": "call-67890",
+        "sessionId": "session-54321",
+        "startTime": "2024-01-15T10:55:00.000Z",
+        "duration": 45,
+        "type": "Voice",
+        "direction": "Inbound",
+        "action": "Phone Call",
+        "result": "Call finished",
+        "to": {
+          "phoneNumber": "+1555987654",
+          "name": "CRM System"
+        },
+        "from": {
+          "phoneNumber": "+1555123456",
+          "name": "Jane Smith"
+        }
+      }
+    ]
+  }
+}
+
+###
+# Example - Missed call
+POST http://localhost:3000/api/ringcentral/webhook
+Content-Type: application/json
+
+{
+  "event": "/restapi/v1.0/account/~/extension/~/call-log",
+  "timestamp": "2024-01-15T12:00:00.000Z",
+  "subscriptionId": "example-subscription-id",
+  "ownerId": "123456789",
+  "body": {
+    "uri": "https://platform.ringcentral.com/restapi/v1.0/account/~/extension/~/call-log",
+    "records": [
+      {
+        "id": "call-99999",
+        "sessionId": "session-11111",
+        "startTime": "2024-01-15T11:50:00.000Z",
+        "duration": 0,
+        "type": "Voice",
+        "direction": "Inbound",
+        "action": "Phone Call",
+        "result": "No Answer",
+        "to": {
+          "phoneNumber": "+1555987654",
+          "name": "CRM System"
+        },
+        "from": {
+          "phoneNumber": "+1555111111",
+          "name": "Unknown Caller"
+        }
+      }
+    ]
+  }
+}
