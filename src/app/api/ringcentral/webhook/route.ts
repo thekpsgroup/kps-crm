@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { callLogs, contacts, deals } from '@/lib/server-supabase'
 import { verifyWebhookSignature } from '@/lib/ringcentral'
 
+// This is an API route, not a server action
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
     const signature = request.headers.get('x-ringcentral-signature') || ''
@@ -11,7 +14,7 @@ export async function POST(request: NextRequest) {
     console.log('RingCentral webhook received:', JSON.stringify(body, null, 2))
 
     // Verify webhook signature
-    if (!verifyWebhookSignature(rawBody, signature)) {
+    if (!(await verifyWebhookSignature(rawBody, signature))) {
       console.error('Webhook signature verification failed')
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }

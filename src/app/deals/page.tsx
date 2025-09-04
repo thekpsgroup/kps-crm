@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase-client';
 import { DealWithRelations, DealStage, KanbanColumn } from '@/types/deals';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AppShell } from '@/components/layout/app-shell';
+import { AuthGuard } from '@/components/auth/auth-guard';
 import Link from 'next/link';
 
 export default function DealsPage() {
@@ -152,7 +153,8 @@ export default function DealsPage() {
   }
 
   return (
-    <AppShell>
+    <AuthGuard>
+      <AppShell>
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
@@ -266,5 +268,6 @@ export default function DealsPage() {
         </div>
       </div>
     </AppShell>
+    </AuthGuard>
   );
 }

@@ -1,5 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
-import type { User } from '@supabase/supabase-js';
+import type { User, Session } from '@supabase/supabase-js';
 
 let supabase: ReturnType<typeof createBrowserClient>;
 
@@ -16,7 +16,13 @@ export function getSupabaseClient() {
 export async function getCurrentUser(): Promise<User | null> {
   try {
     const supabase = getSupabaseClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
+
     return user;
   } catch (error) {
     console.error('Error getting current user:', error);
@@ -24,10 +30,16 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 }
 
-export async function getCurrentSession() {
+export async function getCurrentSession(): Promise<Session | null> {
   try {
     const supabase = getSupabaseClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session }, error } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error('Error getting current session:', error);
+      return null;
+    }
+
     return session;
   } catch (error) {
     console.error('Error getting current session:', error);
@@ -35,10 +47,14 @@ export async function getCurrentSession() {
   }
 }
 
-export async function signOut() {
+export async function signOut(): Promise<void> {
   try {
     const supabase = getSupabaseClient();
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Error signing out:', error);
+    }
   } catch (error) {
     console.error('Error signing out:', error);
   }
@@ -49,4 +65,33 @@ export function onAuthStateChange(callback: (user: User | null) => void) {
   return supabase.auth.onAuthStateChange((_event, session) => {
     callback(session?.user ?? null);
   });
+}
+
+// Helper function to get user profile with role
+export async function getCurrentUserProfile() {
+  try {
+    const user = await getCurrentUser();
+    if (!user) return null;
+
+    // Get user profile from our database
+    const supabase = getSupabaseClient();
+    const { data: profile, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (error) {
+      console.error('Error getting user profile:', error);
+      return null;
+    }
+
+    return {
+      ...user,
+      profile: profile
+    };
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    return null;
+  }
 }

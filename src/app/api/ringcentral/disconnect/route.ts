@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ringcentralIdentity } from '@/lib/server-supabase'
 
+// This is an API route, not a server action
+export const runtime = 'nodejs'
+
 export async function POST(request: NextRequest) {
   try {
     // TODO: In a real app, you'd get the user ID from authentication

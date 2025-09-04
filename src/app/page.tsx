@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
+import { AuthGuard } from "@/components/auth/auth-guard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, Users, Building, Settings, TrendingUp, Phone, DollarSign } from "lucide-react";
 import { Stat } from "@/components/ui/custom/stat";
 
 export default function Home() {
   return (
-    <AppShell>
+    <AuthGuard>
+      <AppShell>
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -147,5 +149,6 @@ export default function Home() {
         </div>
       </div>
     </AppShell>
+    </AuthGuard>
   );
 }

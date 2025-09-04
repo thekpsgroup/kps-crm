@@ -1,5 +1,3 @@
-'use server';
-
 import { ringcentralIdentity, callLogs, contacts, deals } from './server-supabase';
 
 const RINGCENTRAL_SERVER_URL = process.env.RINGCENTRAL_SERVER_URL || 'https://platform.ringcentral.com';
@@ -125,26 +123,31 @@ export async function refreshIfExpiringSoon(userId: string) {
 }
 
 // Verify webhook signature
-export function verifyWebhookSignature(
+export async function verifyWebhookSignature(
   payload: string,
   signature: string,
   secret: string = RINGCENTRAL_WEBHOOK_SECRET
-): boolean {
+): Promise<boolean> {
   if (!secret) {
     console.warn('RINGCENTRAL_WEBHOOK_SECRET not configured, skipping signature verification');
     return true;
   }
 
-  const crypto = require('crypto');
-  const expectedSignature = crypto
+  const crypto = await import('crypto');
+  const expectedSignature = crypto.default
     .createHmac('sha256', secret)
     .update(payload, 'utf8')
     .digest('hex');
 
-  return crypto.timingSafeEqual(
-    Buffer.from(signature, 'hex'),
-    Buffer.from(expectedSignature, 'hex')
-  );
+  const signatureBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expectedSignature);
+
+  try {
+    return crypto.default.timingSafeEqual(signatureBuffer, expectedBuffer);
+  } catch (error) {
+    // If signature lengths don't match, timingSafeEqual throws
+    return false;
+  }
 }
 
 // RingCentral API client methods

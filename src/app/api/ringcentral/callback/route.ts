@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ringcentralIdentity } from '@/lib/server-supabase'
 
+// This is an API route, not a server action
+export const runtime = 'nodejs'
+
 const RINGCENTRAL_SERVER_URL = process.env.RINGCENTRAL_SERVER_URL || 'https://platform.ringcentral.com'
 const RINGCENTRAL_CLIENT_ID = process.env.RINGCENTRAL_CLIENT_ID!
 const RINGCENTRAL_CLIENT_SECRET = process.env.RINGCENTRAL_CLIENT_SECRET!

@@ -1,29 +1,40 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getCurrentUser } from '@/lib/session';
+import { useRouter, usePathname } from 'next/navigation';
+import { getCurrentUserProfile, onAuthStateChange } from '@/lib/session';
 import { Loader2 } from 'lucide-react';
 
 interface AuthGuardProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
+  requiredRole?: 'admin' | 'manager' | 'user';
 }
 
-export function AuthGuard({ children, fallback }: AuthGuardProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export function AuthGuard({ children, fallback, requiredRole }: AuthGuardProps) {
+  const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
+    let authListener: any;
+
     const checkAuth = async () => {
       try {
-        const user = await getCurrentUser();
+        const userProfile = await getCurrentUserProfile();
 
-        if (user) {
-          setIsAuthenticated(true);
+        if (userProfile) {
+          // Check role requirements
+          if (requiredRole && userProfile.profile?.role !== requiredRole && userProfile.profile?.role !== 'admin') {
+            console.warn(`Access denied: Required role ${requiredRole}, user has ${userProfile.profile?.role}`);
+            router.push('/unauthorized');
+            return;
+          }
+
+          setUser(userProfile);
         } else {
-          // Redirect to login if not authenticated
+          // Not authenticated, redirect to login
           router.push('/login');
           return;
         }
@@ -36,8 +47,28 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
       }
     };
 
+    // Initial check
     checkAuth();
-  }, [router]);
+
+    // Listen for auth changes
+    authListener = onAuthStateChange(async (authUser) => {
+      if (authUser) {
+        const userProfile = await getCurrentUserProfile();
+        setUser(userProfile);
+      } else {
+        setUser(null);
+        if (pathname !== '/login') {
+          router.push('/login');
+        }
+      }
+    });
+
+    return () => {
+      if (authListener) {
+        authListener();
+      }
+    };
+  }, [router, pathname, requiredRole]);
 
   if (isLoading) {
     return (
@@ -52,9 +83,29 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return null; // Will redirect to login
   }
 
   return <>{children}</>;
+}
+
+// Admin-only guard
+export function AdminGuard({ children, fallback }: Omit<AuthGuardProps, 'requiredRole'>) {
+  return (
+    <AuthGuard requiredRole="admin" fallback={fallback}>
+      {children}
+    </AuthGuard>
+  );
+}
+
+// Manager or Admin guard
+export function ManagerGuard({ children, fallback }: Omit<AuthGuardProps, 'requiredRole'>) {
+  return (
+    <AuthGuard requiredRole="manager" fallback={fallback}>
+      <AdminGuard fallback={fallback}>
+        {children}
+      </AdminGuard>
+    </AuthGuard>
+  );
 }

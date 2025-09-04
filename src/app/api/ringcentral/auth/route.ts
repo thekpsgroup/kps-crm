@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// This is an API route, not a server action
+export const runtime = 'nodejs'
+
 const RINGCENTRAL_SERVER_URL = process.env.RINGCENTRAL_SERVER_URL || 'https://platform.ringcentral.com'
 const RINGCENTRAL_CLIENT_ID = process.env.RINGCENTRAL_CLIENT_ID!
 const RINGCENTRAL_REDIRECT_URI = process.env.RINGCENTRAL_REDIRECT_URI!
