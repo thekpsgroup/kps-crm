@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Handle OAuth errors
     if (error) {
       console.error('RingCentral OAuth error:', error, errorDescription)
-      const settingsUrl = new URL('/settings', request.url)
+      const settingsUrl = new URL('/settings', process.env.NEXT_PUBLIC_APP_URL || 'https://simple-d1od43di9-thekpsgroup.vercel.app')
       settingsUrl.searchParams.set('error', error)
       if (errorDescription) {
         settingsUrl.searchParams.set('error_description', errorDescription)
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Redirect to settings with success
-    const settingsUrl = new URL('/settings', request.url)
+    const settingsUrl = new URL('/settings', process.env.NEXT_PUBLIC_APP_URL || 'https://simple-d1od43di9-thekpsgroup.vercel.app')
     settingsUrl.searchParams.set('rc', 'connected')
     return NextResponse.redirect(settingsUrl)
 
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
     console.error('RingCentral callback error:', error)
 
     // Redirect to settings with error
-    const settingsUrl = new URL('/settings', request.url)
+    const settingsUrl = new URL('/settings', process.env.NEXT_PUBLIC_APP_URL || 'https://simple-d1od43di9-thekpsgroup.vercel.app')
     settingsUrl.searchParams.set('error', 'callback_failed')
     return NextResponse.redirect(settingsUrl)
   }

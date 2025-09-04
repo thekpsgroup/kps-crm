@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('RingCentral auth error:', error)
 
-    // Redirect back to settings with error
-    const settingsUrl = new URL('/settings', request.url)
+          // Redirect back to settings with error
+    const settingsUrl = new URL('/settings', process.env.NEXT_PUBLIC_APP_URL || 'https://simple-d1od43di9-thekpsgroup.vercel.app')
     settingsUrl.searchParams.set('error', 'oauth_failed')
     return NextResponse.redirect(settingsUrl)
   }
